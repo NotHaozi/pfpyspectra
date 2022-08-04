@@ -1,0 +1,12 @@
+numpy
+pybind11
+scipy
+
+[doc]
+sphinx>=2.1
+sphinx-autodoc-typehints
+sphinx_rtd_theme
+
+[test]
+pytest>=5.4
+pytest-cov
