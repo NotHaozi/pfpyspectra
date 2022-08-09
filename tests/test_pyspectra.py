@@ -3,12 +3,14 @@
 from typing import Callable, List, Optional, Tuple, TypeVar, Union
 
 import numpy as np
+import scipy.sparse
 import pytest
 
 from pfpyspectra import eigensolver, eigensolverh
 
 from .util_test import (check_eigenpairs, create_random_matrix,
-                        create_symmetic_matrix)
+                        create_random_spmatrix, create_symmetic_matrix)
+
 
 T = TypeVar('T')
 
@@ -17,7 +19,7 @@ SIGMA = 1.0 + 0.5j
 
 
 def run_test(fun: Callable[[T], Tuple[np.ndarray, np.ndarray]],
-             mat: np.ndarray, nvalues: int, rules: List[str],
+             mat: scipy.sparse, nvalues: int, rules: List[str],
              search_space: Optional[int],
              shift: Optional[Union[np.float, np.complex]],
              generalized: Optional[np.ndarray] = None) -> None:
@@ -36,7 +38,7 @@ def run_test(fun: Callable[[T], Tuple[np.ndarray, np.ndarray]],
 
 def test_eigensolver():
     """Check the eigensolver interface."""
-    mat = create_random_matrix(SIZE)
+    mat = create_random_spmatrix(SIZE)
     rules = ("LargestMagn",
              "LargestReal",
              "LargestImag",
@@ -65,6 +67,7 @@ def test_eigensolver():
              search_space=search_space, shift=SIGMA)
 
 
+
 def test_eigensolverh():
     """Check the eigensolverh interface."""
     mat = create_symmetic_matrix(SIZE)
@@ -86,6 +89,7 @@ def test_eigensolverh():
     print(f"default search space and shift = {SIGMA.real}")
     run_test(eigensolverh, mat, nvalues, rules,
              search_space=None, shift=SIGMA.real)
+
 
 
 def test_invalid_argument():

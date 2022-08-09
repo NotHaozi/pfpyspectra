@@ -122,7 +122,7 @@ geneigssolver(const SpMatrix &mat, Index nvalues, Index nvectors,
   // Spectra::SparseGenMatProd<double> op(mat);
   Spectra::GenEigsSolver<SparseOp> eigs(op, nvalues, nvectors);
 
-  printf("调用了GenEigsSolver<SparseOp>\n");
+  // printf("调用了GenEigsSolver<SparseOp>\n");
   return compute_and_check<ComplexVector, ComplexMatrix>(eigs, selection);
 }
 

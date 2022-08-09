@@ -1,2 +1,0 @@
-pyspectra
-spectra_sparse_interface

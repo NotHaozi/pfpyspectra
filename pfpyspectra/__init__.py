@@ -5,8 +5,8 @@ import spectra_sparse_interface
 from .__version__ import __version__
 from .pfpyspectra import eigensolver, eigensolverh
 
-__author__ = "123124124"
-__email__ = '213123123@qq.com'
+__author__ = "pf_test"
+__email__ = 'pf_test_email'
 
 
 __all__ = ["__version__", "eigensolver",
