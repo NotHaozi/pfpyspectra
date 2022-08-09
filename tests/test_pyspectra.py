@@ -5,7 +5,7 @@ from typing import Callable, List, Optional, Tuple, TypeVar, Union
 import numpy as np
 import pytest
 
-from pyspectra import eigensolver, eigensolverh
+from pfpyspectra import eigensolver, eigensolverh
 
 from .util_test import (check_eigenpairs, create_random_matrix,
                         create_symmetic_matrix)

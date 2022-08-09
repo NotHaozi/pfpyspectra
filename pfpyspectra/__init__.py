@@ -3,7 +3,7 @@
 import spectra_sparse_interface
 
 from .__version__ import __version__
-from .pyspectra import eigensolver, eigensolverh
+from .pfpyspectra import eigensolver, eigensolverh
 
 __author__ = "123124124"
 __email__ = '213123123@qq.com'

@@ -8,6 +8,7 @@ API
 from typing import Optional, Tuple, Union
 
 import numpy as np
+import scipy.sparse
 
 import spectra_sparse_interface
 
@@ -28,7 +29,7 @@ EigenPair = Tuple[np.ndarray, np.ndarray]
 
 
 def check_and_sanitize(
-        mat: np.ndarray, nvalues: int, selection_rule: Optional[str],
+        mat: scipy.sparse, nvalues: int, selection_rule: Optional[str],
         search_space: Optional[int],
         shift: Optional[Union[np.float, np.complex]]) -> (str, str):
     """Check that the values are correct and initialize missing values."""
@@ -51,7 +52,7 @@ def check_and_sanitize(
 
 
 def eigensolver(
-        mat: np.ndarray, nvalues: int, selection_rule: Optional[str] = None,
+        mat: scipy.sparse, nvalues: int, selection_rule: Optional[str] = None,
         search_space: Optional[int] = None,
         shift: Optional[Union[np.float, np.complex]] = None) -> EigenPair:
     """
@@ -83,12 +84,14 @@ def eigensolver(
     Tuple[np.ndarray, np.ndarray]
         Eigenvalues and eigenvectors
     """
+    
     search_space, selection_rule = check_and_sanitize(
         mat, nvalues, selection_rule, search_space, shift)
 
     if shift is None:
         return spectra_sparse_interface.general_eigensolver(
             mat, nvalues, search_space, selection_rule)
+
     if isinstance(shift, np.float):
         return spectra_sparse_interface.general_real_shift_eigensolver(
             mat, nvalues, search_space, shift, selection_rule)
@@ -98,7 +101,7 @@ def eigensolver(
 
 
 def eigensolverh(
-        mat: np.ndarray, nvalues: int, selection_rule: Optional[str] = None,
+        mat: scipy.sparse, nvalues: int, selection_rule: Optional[str] = None,
         search_space: Optional[int] = None, generalized: np.ndarray = None,
         shift: Optional[Union[np.float, np.complex]] = None) -> EigenPair:
     """Compute ``nvalues`` eigenvalues for the symmetric matrix ``mat``.
@@ -143,3 +146,4 @@ def eigensolverh(
     else:
         return spectra_sparse_interface.symmetric_generalized_shift_eigensolver(
             mat, generalized, nvalues, search_space, shift, selection_rule)
+    

@@ -5,7 +5,7 @@ from typing import Callable, List, Tuple, TypeVar
 import numpy as np
 import pytest
 
-from pyspectra import spectra_sparse_interface
+from pfpyspectra import spectra_sparse_interface
 
 from .util_test import (check_eigenpairs, create_random_matrix,
                         create_symmetic_matrix)

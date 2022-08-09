@@ -11,9 +11,9 @@ from setuptools import Extension, setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-# To update the package version number, edit pyspectra/__version__.py
+# To update the package version number, edit pfpyspectra/__version__.py
 version = {}
-with open(os.path.join(here, 'pyspectra', '__version__.py')) as f:
+with open(os.path.join(here, 'pfpyspectra', '__version__.py')) as f:
     exec(f.read(), version)
 
 with open('README.md') as readme_file:
@@ -143,28 +143,28 @@ library_dirs = [conda_lib]
 
 ext_pybind = Extension(
     'spectra_sparse_interface',
-    sources=['pyspectra/interface/spectra_sparse_interface.cc'],
+    sources=['pfpyspectra/interface/spectra_sparse_interface.cc'],
     include_dirs=list(filter(lambda x: x, include_dirs)),
     library_dirs=list(filter(lambda x: x, library_dirs)),
     language='c++')
 
 
 setup(
-    name='pf_pySpectra',
+    name='pfpyspectra',
     version=version['__version__'],
     description="Python interface to the C++ Spectra library",
     long_description=readme + '\n\n',
     long_description_content_type='text/markdown',
-    author="Netherlands eScience Center",
-    author_email='f.zapata@esciencecenter.nl',
-    url='https://github.com//pyspectra',
+    author="pf_test",
+    author_email='pf_test_email',
+    url='https://github.com/NotHaozi/pfpyspectra.git',
     packages=[
-        'pyspectra',
+        'pfpyspectra',
     ],
     include_package_data=True,
     license="Apache Software License 2.0",
     zip_safe=False,
-    keywords='pyspectra',
+    keywords='pfpyspectra',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
