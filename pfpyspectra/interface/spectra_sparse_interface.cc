@@ -41,7 +41,7 @@
 
 namespace py = pybind11;
 
-// BUG: 稀疏矩阵类型 接口不对
+// NOTE: 稀疏矩阵类型 接口不对
 // using ComplexMatrix = Eigen::MatrixXcd;
 // using ComplexVector = Eigen::VectorXcd;
 

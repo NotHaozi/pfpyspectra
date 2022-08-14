@@ -14,10 +14,10 @@ def create_random_matrix(size: int) -> np.array:
     return np.random.normal(size=size ** 2).reshape(size, size)
 
 
-def create_random_spmatrix(size: int) -> np.array:
-    """Create a numpy random spmatrix."""
-    mat = np.random.normal(size=size ** 2).reshape(size, size)
-    return sp.csc_matrix(mat)
+def create_random_spmatrix(size: int) -> sp:
+    """Create a scipy random spmatrix."""
+    mat = sp.rand(size, size, format='csc')
+    return mat
 
 
 def create_symmetic_matrix(size: int) -> np.array:

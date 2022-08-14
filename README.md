@@ -10,7 +10,7 @@ These two functions would invoke the most suitable method based on the informati
 
 **Note**:
 
-  The [available selection_rules](https://github.com/NLESC-JCER/pyspectra/blob/master/include/Spectra/Util/SelectionRule.h) to compute a portion of the spectrum are:
+  The available selection_rules to compute a portion of the spectrum are:
   *  LargestMagn
   *  LargestReal
   *  LargestImag
@@ -65,7 +65,7 @@ The following functions are available in the spectra_sparse_interface:
    ```
 
 ### Example
-Eigenpairs of a symmetric dense matrix using shift
+
 ```py
 import numpy as np
 import scipy.sparse as sp
@@ -74,7 +74,7 @@ from scipy.sparse.linalg import eigs, eigsh
 from pfpyspectra import eigensolver, eigensolverh
 
 # matrix size
-size = 10
+size = 100
 
 # number of eigenpairs to compute
 nvalues = 2
@@ -84,6 +84,7 @@ SIGMA = 1.0 + 0.5j
 xs = np.random.normal(size=size ** 2).reshape(size, size)
 print("xs = ", xs)
 print("--------------------")
+
 # Create symmetric matrix
 mat = xs + xs.T
 print("mat = ", mat)
@@ -92,68 +93,89 @@ print("--------------------")
 # largest magnitude (default).
 
 
-# new_xs = sp.csc_matrix(xs)
-# print("new_xs = ", xs)
-# print("--------------------")
-
-# selection_rule = "LargestMagn"
-# eigenvalues, eigenvectors = eigensolver(new_xs, nvalues, selection_rule)
-# print(eigenvalues)
-# print("--------------------")
-# print(eigenvectors)
-# print("--------------------")
-
-# print("scipy_noshift:ans--------------------------------")
-# ans_vals, ans_vecs = eigs(new_xs, nvalues, which='LM', ncv=6)
-# print(ans_vals)
-# print("--------------------")
-# print(ans_vecs)
-# print("--------------------")
-
-# print("scipy_shift_real:ans--------------------------------")
-# ans_vals, ans_vecs = eigs(new_xs, nvalues, which='LM', sigma=SIGMA.real)
-# print(ans_vals)
-# print("--------------------")
-# print(ans_vecs)
-# print("--------------------")
-
-# print("scipy_shift:ans--------------------------------")
-# ans_vals, ans_vecs = eigs(new_xs, nvalues, which='LM', sigma=SIGMA)
-# print(ans_vals)
-# print("--------------------")
-# print(ans_vecs)
-# print("--------------------")
-
-# eigenvalues, eigenvectors = eigensolver(new_xs, nvalues, selection_rule, shift=SIGMA.real)
-# print(eigenvalues)
-# print("--------------------")
-# print(eigenvectors)
-# print("--------------------")
-
-# eigenvalues, eigenvectors = eigensolver(new_xs, nvalues, selection_rule, shift=SIGMA)
-# print(eigenvalues)
-# print("--------------------")
-# print(eigenvectors)
-# print("--------------------")
-
-# Compute two eigenpairs selecting the eigenvalues with
-# largest algebraic value
-selection_rule = "LargestMagn"
-
-print("sym:scipy_noshift:ans--------------------------------")
-ans_vals, ans_vecs = eigsh(mat, nvalues, which='LM', ncv=6)
-print(ans_vals)
-print("--------------------")
-print(ans_vecs)
+new_xs = sp.csc_matrix(xs)
+print("new_xs = ", xs)
 print("--------------------")
 
-print("sym:my--------------------------------")
-symm_eigenvalues, symm_eigenvectors = eigensolverh(
-    mat, nvalues, selection_rule)
-print(symm_eigenvalues)
-print("--------------------")
-print(symm_eigenvectors)
-print("--------------------")
+# selection_rule = ["LargestMagn",
+#                   "LargestReal",
+#                   "LargestImag",
+#                   "LargestAlge",
+#                   "SmallestReal",
+#                   "SmallestMagn",
+#                   "SmallestImag",
+#                   "SmallestAlge",
+#                   "BothEnds"]
+
+selection_rule = ["LargestMagn",
+                  "LargestReal",
+                  "LargestImag",
+                  "SmallestReal",
+                  ]
+
+# which_rule = ["LM", "LR", "LI", "SR", "SM", "SI"]
+which_rule = ["LM", "LR", "LI", "SR"]
+
+
+for i in range(4):
+    print(f"\ntest_rule{i}:{which_rule[i]}")
+    # 1 eigensolver
+
+    # 1.1
+    eigenvalues, eigenvectors = eigensolver(new_xs, nvalues, selection_rule[i])
+    
+    print()    
+    print("test_noshift:--------------------------------")
+    print(eigenvalues)
+    # print("--------------------")
+    # print(eigenvectors)
+    # print("--------------------")
+
+    print("scipy_noshift:ans--------------------------------")
+    ans_vals, ans_vecs = eigs(new_xs, nvalues, which=which_rule[i], ncv=6)
+    print(ans_vals)
+    # print("--------------------")
+    # print(ans_vecs)
+    # print("--------------------")
+
+    # 1.2
+
+    eigenvalues, eigenvectors = eigensolver(
+        new_xs, nvalues, selection_rule[i], shift=SIGMA.real)
+
+    print()
+
+    print("test_shift_real--------------------------------")    
+    print(eigenvalues)
+    # print("--------------------")
+    # print(eigenvectors)
+    # print("--------------------")
+
+    print("scipy_shift_real:ans--------------------------------")
+    ans_vals, ans_vecs = eigs(new_xs, nvalues, which=which_rule[i], sigma=SIGMA.real)
+    print(ans_vals)
+    # print("--------------------")
+    # print(ans_vecs)
+    # print("--------------------")
+
+    # 1.3
+
+    eigenvalues, eigenvectors = eigensolver(
+        new_xs, nvalues, selection_rule[i], shift=SIGMA)
+    
+    print()
+    print("test_shift--------------------------------")
+    print(eigenvalues)
+    # print("--------------------")
+    # print(eigenvectors)
+    # print("--------------------")
+
+    print("scipy_shift:ans--------------------------------")
+    ans_vals, ans_vecs = eigs(new_xs, nvalues, which=which_rule[i], sigma=SIGMA)
+    print(ans_vals)
+    # print("--------------------")
+    # print(ans_vecs)
+    # print("--------------------")
 ```
 
 **All functions return a tuple whith the resulting eigenvalues and eigenvectors.**
@@ -162,9 +184,9 @@ print("--------------------")
 ## Installation
 To install pyspectra, do:
 ```bash
-  git clone https://github.com/NotHaozi/pfpyspectra.git
+  git clone git@gitee.com:PerfXLab/spectra4py.git
   cd pyspectra
-  pip install .
+  bash ./install.sh
 ```
 
 Run tests (including coverage) with:

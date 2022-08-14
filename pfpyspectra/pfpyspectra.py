@@ -99,7 +99,7 @@ def eigensolver(
         return spectra_sparse_interface.general_complex_shift_eigensolver(
             mat, nvalues, search_space, shift.real, shift.imag, selection_rule)
 
-
+# BUG: 对称矩阵的数据类型 稀疏？
 def eigensolverh(
         mat: scipy.sparse, nvalues: int, selection_rule: Optional[str] = None,
         search_space: Optional[int] = None, generalized: np.ndarray = None,
