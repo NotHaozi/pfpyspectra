@@ -133,6 +133,7 @@ eigen_path = search_eigen()
 
 include_dirs = (
     'include',
+    'pfpyspectra/interface',
     conda_include,
     eigen_path,
     GetPybindInclude(),
@@ -141,13 +142,19 @@ include_dirs = (
 
 library_dirs = [conda_lib]
 
-ext_pybind = Extension(
-    'spectra_sparse_interface',
-    sources=['pfpyspectra/interface/spectra_sparse_interface.cc'],
+ext_pybind_dense = Extension(
+    'spectra_dense_interface',
+    sources=['pfpyspectra/interface/spectra_dense_interface.cc'],
     include_dirs=list(filter(lambda x: x, include_dirs)),
     library_dirs=list(filter(lambda x: x, library_dirs)),
     language='c++')
 
+ext_pybind_sparse = Extension(
+    'spectra_sparse_interface',
+    sources=['pfpyspectra/interface/spectra_sparse_interface.cc',],
+    include_dirs=list(filter(lambda x: x, include_dirs)),
+    library_dirs=list(filter(lambda x: x, library_dirs)),
+    language='c++')
 
 setup(
     name='pfpyspectra',
@@ -157,7 +164,7 @@ setup(
     long_description_content_type='text/markdown',
     author="pf_test",
     author_email='pf_test_email',
-    url='https://github.com/NotHaozi/pfpyspectra.git',
+    url='git@gitee.com:PerfXLab/spectra4py.git',
     packages=[
         'pfpyspectra',
     ],
@@ -177,7 +184,7 @@ setup(
     ],
     install_requires=['numpy', "pybind11", "scipy"],
     cmdclass={'build_ext': BuildExt},
-    ext_modules=[ext_pybind],
+    ext_modules=[ext_pybind_dense, ext_pybind_sparse],
     extras_require={
         'doc': ['sphinx>=2.1',
                 'sphinx-autodoc-typehints',

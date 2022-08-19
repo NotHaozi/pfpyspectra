@@ -3,23 +3,23 @@
 from typing import Callable, List, Optional, Tuple, TypeVar, Union
 
 import numpy as np
-import scipy.sparse
+import scipy.sparse as sp
 import pytest
 
 from pfpyspectra import eigensolver, eigensolverh
 
 from .util_test import (check_eigenpairs, create_random_matrix,
-                        create_random_spmatrix, create_symmetic_matrix)
+                        create_random_spmatrix, create_sparse_symmetic_matrix, create_symmetic_matrix)
 
 
 T = TypeVar('T')
 
-SIZE = 100  # Matrix size
+SIZE = 200  # Matrix size
 SIGMA = 1.0 + 0.5j
 
 
 def run_test(fun: Callable[[T], Tuple[np.ndarray, np.ndarray]],
-             mat: scipy.sparse, nvalues: int, rules: List[str],
+             mat: Union[np.ndarray, sp.spmatrix], nvalues: int, rules: List[str],
              search_space: Optional[int],
              shift: Optional[Union[np.float, np.complex]],
              generalized: Optional[np.ndarray] = None) -> None:
@@ -35,8 +35,43 @@ def run_test(fun: Callable[[T], Tuple[np.ndarray, np.ndarray]],
                          search_space=search_space, shift=shift)
         check_eigenpairs(mat, es, cs)
 
+# TAG1: Dense General
+
 
 def test_eigensolver():
+    """Check the eigensolver interface."""
+    mat = create_random_matrix(SIZE)
+    rules = ("LargestMagn",
+             "LargestReal",
+             "LargestImag",
+             "SmallestReal")
+
+    nvalues = 2
+    print("default search space and shift = None")
+    run_test(eigensolver, mat, nvalues, rules,
+             search_space=None, shift=None)
+
+    search_space = nvalues * 5
+    print("search_space = nvalues * 5 and shift = None")
+    run_test(eigensolver, mat, nvalues, rules,
+             search_space=search_space, shift=None)
+
+    print("search_space = default and shift = 1.0")
+    run_test(eigensolver, mat, nvalues, rules,
+             search_space=None, shift=SIGMA.real)
+
+    print("search_space = default and shift = 1.0 + 0.5j")
+    run_test(eigensolver, mat, nvalues, rules,
+             search_space=None, shift=SIGMA)
+
+    print("search_space = nvalues *  5 and shift = 1.0 + 0.5j")
+    run_test(eigensolver, mat, nvalues, rules,
+             search_space=search_space, shift=SIGMA)
+
+# TAG2: Sparse General
+
+
+def test_sparse_eigensolver():
     """Check the eigensolver interface."""
     mat = create_random_spmatrix(SIZE)
     rules = ("LargestMagn",
@@ -66,6 +101,7 @@ def test_eigensolver():
     run_test(eigensolver, mat, nvalues, rules,
              search_space=search_space, shift=SIGMA)
 
+# TAG3: Dense Symmetric
 
 
 def test_eigensolverh():
@@ -90,6 +126,30 @@ def test_eigensolverh():
     run_test(eigensolverh, mat, nvalues, rules,
              search_space=None, shift=SIGMA.real)
 
+# TAG4: Sparse Symmetric
+
+
+def test_sparse_eigensolverh():
+    """Check the eigensolverh interface."""
+    mat = create_sparse_symmetic_matrix(SIZE)
+    rules = ("LargestMagn",
+             "LargestAlge",
+             "SmallestAlge",
+             "BothEnds"
+             )
+
+    nvalues = 2
+    print("default search space and shift = None")
+    run_test(eigensolverh, mat, nvalues, rules,
+             search_space=None, shift=None)
+
+    print("search space = nvalues * 5 and shift = None")
+    run_test(eigensolverh, mat, nvalues, rules,
+             search_space=nvalues * 5, shift=None)
+
+    print(f"default search space and shift = {SIGMA.real}")
+    run_test(eigensolverh, mat, nvalues, rules,
+             search_space=None, shift=SIGMA.real)
 
 
 def test_invalid_argument():

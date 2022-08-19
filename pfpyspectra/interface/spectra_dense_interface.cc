@@ -13,24 +13,21 @@
 #endif // DEBUG
 
 #include <Eigen/Core>
-#include <Eigen/Sparse>
+#include <Eigen/Dense>
 #include <utility>
-
-#include <Spectra/MatOp/SparseGenComplexShiftSolve.h>
-#include <Spectra/MatOp/SparseGenMatProd.h>
-#include <Spectra/MatOp/SparseGenRealShiftSolve.h>
-#include <Spectra/MatOp/SparseSymMatProd.h>
-#include <Spectra/MatOp/SparseSymShiftSolve.h>
-#include <Spectra/MatOp/SymShiftInvert.h>
 
 #include <Spectra/GenEigsComplexShiftSolver.h>
 #include <Spectra/GenEigsRealShiftSolver.h>
 #include <Spectra/GenEigsSolver.h>
+#include <Spectra/MatOp/DenseGenComplexShiftSolve.h>
+#include <Spectra/MatOp/DenseGenMatProd.h>
+#include <Spectra/MatOp/DenseGenRealShiftSolve.h>
+#include <Spectra/MatOp/DenseSymMatProd.h>
+#include <Spectra/MatOp/DenseSymShiftSolve.h>
+#include <Spectra/MatOp/SymShiftInvert.h>
 #include <Spectra/SymEigsShiftSolver.h>
 #include <Spectra/SymEigsSolver.h>
-// #include <Spectra/SymGEigsSolver.h>
 #include <Spectra/SymGEigsShiftSolver.h>
-// #include <Spectra/DavidsonSymEigsSolver.h>
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
@@ -39,15 +36,12 @@ namespace py = pybind11;
 
 using ComplexMatrix = Eigen::MatrixXcd;
 using ComplexVector = Eigen::VectorXcd;
-using SpMatrix = Eigen::SparseMatrix<double>;
-using SpVector = Eigen::SparseVector<double>;
-
 using Matrix = Eigen::MatrixXd;
 using Vector = Eigen::VectorXd;
-
 using Eigen::Index;
 
 #include <Eigen/Core>
+
 #include <utility>
 
 Spectra::SortRule string_to_sortrule(const std::string &name) {
@@ -93,113 +87,109 @@ compute_and_check(Solver &eigs, const std::string &selection) {
   }
 }
 
-// TAG: 1 普通矩阵
-
 /// \brief Call the Spectra::GenEigsSolver eigensolver
 std::pair<ComplexVector, ComplexMatrix>
-sparsegeneigssolver(const SpMatrix &mat, Index nvalues, Index nvectors,
-                    const std::string &selection) {
+geneigssolver(const Matrix &mat, Index nvalues, Index nvectors,
+              const std::string &selection) {
   INFO();
-  using SparseOp = Spectra::SparseGenMatProd<double>;
+  using DenseOp = Spectra::DenseGenMatProd<double>;
 
-  // Construct matrix operation object using the wrapper class SparseSymMatProd
-  SparseOp op(mat);
-  // Spectra::SparseGenMatProd<double> op(mat);
-  Spectra::GenEigsSolver<SparseOp> eigs(op, nvalues, nvectors);
-
+  // Construct matrix operation object using the wrapper class DenseSymMatProd
+  DenseOp op(mat);
+  Spectra::GenEigsSolver<DenseOp> eigs(op, nvalues, nvectors);
   return compute_and_check<ComplexVector, ComplexMatrix>(eigs, selection);
 }
 
 /// \brief Call the Spectra::GenEigsRealShiftSolver eigensolver
 std::pair<ComplexVector, ComplexMatrix>
-sparsegeneigsrealshiftsolver(const SpMatrix &mat, Index nvalues, Index nvectors,
-                             double sigma, const std::string &selection) {
+geneigsrealshiftsolver(const Matrix &mat, Index nvalues, Index nvectors,
+                       double sigma, const std::string &selection) {
   INFO();
-  using SparseOp = Spectra::SparseGenRealShiftSolve<double>;
-  SparseOp op(mat);
-  Spectra::GenEigsRealShiftSolver<SparseOp> eigs(op, nvalues, nvectors, sigma);
+  using DenseOp = Spectra::DenseGenRealShiftSolve<double>;
+  DenseOp op(mat);
+  Spectra::GenEigsRealShiftSolver<DenseOp> eigs(op, nvalues, nvectors, sigma);
   return compute_and_check<ComplexVector, ComplexMatrix>(eigs, selection);
 }
 
 /// \brief Call the Spectra::GenEigsComplexShiftSolver eigensolver
 std::pair<ComplexVector, ComplexMatrix>
-sparsegeneigscomplexshiftsolver(const SpMatrix &mat, Index nvalues,
-                                Index nvectors, double sigmar, double sigmai,
-                                const std::string &selection) {
+geneigscomplexshiftsolver(const Matrix &mat, Index nvalues, Index nvectors,
+                          double sigmar, double sigmai,
+                          const std::string &selection) {
   INFO();
-  using SparseOp = Spectra::SparseGenComplexShiftSolve<double>;
-  SparseOp op(mat);
-  Spectra::GenEigsComplexShiftSolver<SparseOp> eigs(op, nvalues, nvectors,
-                                                    sigmar, sigmai);
+  using DenseOp = Spectra::DenseGenComplexShiftSolve<double>;
+  DenseOp op(mat);
+  Spectra::GenEigsComplexShiftSolver<DenseOp> eigs(op, nvalues, nvectors,
+                                                   sigmar, sigmai);
   return compute_and_check<ComplexVector, ComplexMatrix>(eigs, selection);
 }
 
-// TAG: 2 对称矩阵
-
-/// \brief Call the Spectra::SparseSymMatProd eigensolver
-std::pair<Vector, Matrix> sparsesymeigssolver(const SpMatrix &mat,
-                                              Index nvalues, Index nvectors,
-                                              const std::string &selection) {
+/// \brief Call the Spectra::DenseSymMatProd eigensolver
+std::pair<Vector, Matrix> symeigssolver(const Matrix &mat, Index nvalues,
+                                        Index nvectors,
+                                        const std::string &selection) {
   INFO();
-  using SparseSym = Spectra::SparseSymMatProd<double>;
-  // Construct matrix operation object using the wrapper class
-  SparseSym op(mat);
-  Spectra::SymEigsSolver<SparseSym> eigs(op, nvalues, nvectors);
+  using DenseSym = Spectra::DenseSymMatProd<double>;
+  // Construct matrix operation object using the wrapper class DenseSymMatProd
+  DenseSym op(mat);
+  Spectra::SymEigsSolver<DenseSym> eigs(op, nvalues, nvectors);
 
   return compute_and_check<Vector, Matrix>(eigs, selection);
 }
 
 /// \brief Call the Spectra::SymEigsShiftSolver eigensolver
-std::pair<Vector, Matrix>
-sparsesymeigsshiftsolver(const SpMatrix &mat, Index nvalues, Index nvectors,
-                         double sigma, const std::string &selection) {
+std::pair<Vector, Matrix> symeigsshiftsolver(const Matrix &mat, Index nvalues,
+                                             Index nvectors, double sigma,
+                                             const std::string &selection) {
   INFO();
-  using SparseSymShift = Spectra::SparseSymShiftSolve<double>;
-  // Construct matrix operation object using the wrapper class
-  SparseSymShift op(mat);
-  Spectra::SymEigsShiftSolver<SparseSymShift> eigs(op, nvalues, nvectors,
-                                                   sigma);
+  using DenseSymShift = Spectra::DenseSymShiftSolve<double>;
+  // Construct matrix operation object using the wrapper class DenseSymMatProd
+  DenseSymShift op(mat);
+  Spectra::SymEigsShiftSolver<DenseSymShift> eigs(op, nvalues, nvectors, sigma);
 
   return compute_and_check<Vector, Matrix>(eigs, selection);
 }
 
 /// \brief Call the Spectra::SymGEigsShiftSolver eigensolver
-std::pair<Vector, Matrix> sparsesymgeneigsshiftsolver(const SpMatrix &mat_A,
-                                                const SpMatrix &mat_B,
+std::pair<Vector, Matrix> symgeneigsshiftsolver(const Matrix &mat_A,
+                                                const Matrix &mat_B,
                                                 Index nvalues, Index nvectors,
                                                 double sigma,
                                                 const std::string &selection) {
   INFO();
   using SymShiftInvert =
-      Spectra::SymShiftInvert<double, Eigen::Sparse, Eigen::Sparse>;
-  using SparseSym = Spectra::SparseSymMatProd<double>;
+      Spectra::SymShiftInvert<double, Eigen::Dense, Eigen::Dense>;
+  using DenseSym = Spectra::DenseSymMatProd<double>;
 
-  // Construct matrix operation object using the wrapper class
+  // Construct matrix operation object using the wrapper class DenseSymMatProd
   SymShiftInvert op_A(mat_A, mat_B);
-  SparseSym op_B(mat_B);
-  Spectra::SymGEigsShiftSolver<SymShiftInvert, SparseSym,
+  DenseSym op_B(mat_B);
+  Spectra::SymGEigsShiftSolver<SymShiftInvert, DenseSym,
                                Spectra::GEigsMode::ShiftInvert>
       eigs(op_A, op_B, nvalues, nvectors, sigma);
 
   return compute_and_check<Vector, Matrix>(eigs, selection);
 }
 
-// NOTE: 稀疏矩阵只支持copy
-PYBIND11_MODULE(spectra_sparse_interface, m) {
+PYBIND11_MODULE(spectra_dense_interface, m) {
   m.doc() = "Interface to the C++ spectra library, see: "
             "https://github.com/yixuan/spectra";
 
-  m.def("sparse_general_eigensolver", &sparsegeneigssolver);
+  m.def("general_eigensolver", &geneigssolver,
+        py::return_value_policy::reference_internal);
 
-  m.def("sparse_general_real_shift_eigensolver", &sparsegeneigsrealshiftsolver);
+  m.def("general_real_shift_eigensolver", &geneigsrealshiftsolver,
+        py::return_value_policy::reference_internal);
 
-  m.def("sparse_general_complex_shift_eigensolver",
-        &sparsegeneigscomplexshiftsolver);
+  m.def("general_complex_shift_eigensolver", &geneigscomplexshiftsolver,
+        py::return_value_policy::reference_internal);
 
-  m.def("sparse_symmetric_eigensolver", &sparsesymeigssolver);
+  m.def("symmetric_eigensolver", &symeigssolver,
+        py::return_value_policy::reference_internal);
 
-  m.def("sparse_symmetric_shift_eigensolver", &sparsesymeigsshiftsolver);
+  m.def("symmetric_shift_eigensolver", &symeigsshiftsolver,
+        py::return_value_policy::reference_internal);
 
-  m.def("sparse_symmetric_generalized_shift_eigensolver",
-        &sparsesymgeneigsshiftsolver);
+  m.def("symmetric_generalized_shift_eigensolver", &symgeneigsshiftsolver,
+        py::return_value_policy::reference_internal);
 }

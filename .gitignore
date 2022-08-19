@@ -88,3 +88,5 @@ scripts/.DS_Store
 
 # compilation
 tmp
+
+.pytest_cache

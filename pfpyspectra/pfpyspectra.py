@@ -8,10 +8,10 @@ API
 from typing import Optional, Tuple, Union
 
 import numpy as np
-import scipy.sparse
+import scipy.sparse as sp
 
+import spectra_dense_interface
 import spectra_sparse_interface
-
 
 __all__ = ["eigensolver", "eigensolverh"]
 
@@ -25,11 +25,17 @@ rules = {"LargestMagn",
          "SmallestAlge",
          "BothEnds"}
 
+# rules = {"LargestMagn",
+#          "LargestReal",
+#          "LargestImag",
+#          "SmallestReal"
+#          }
+
 EigenPair = Tuple[np.ndarray, np.ndarray]
 
 
 def check_and_sanitize(
-        mat: scipy.sparse, nvalues: int, selection_rule: Optional[str],
+        mat: Union[np.ndarray, sp.spmatrix], nvalues: int, selection_rule: Optional[str],
         search_space: Optional[int],
         shift: Optional[Union[np.float, np.complex]]) -> (str, str):
     """Check that the values are correct and initialize missing values."""
@@ -43,7 +49,6 @@ def check_and_sanitize(
         selection_rule = "LargestMagn"
     if search_space is None:
         search_space = nvalues * 5
-
     if shift is not None:
         if not any(isinstance(shift, x) for x in (np.float, np.complex)):
             raise RuntimeError("Shift must be None, float or complex")
@@ -52,7 +57,7 @@ def check_and_sanitize(
 
 
 def eigensolver(
-        mat: scipy.sparse, nvalues: int, selection_rule: Optional[str] = None,
+        mat: Union[np.ndarray, sp.spmatrix], nvalues: int, selection_rule: Optional[str] = None,
         search_space: Optional[int] = None,
         shift: Optional[Union[np.float, np.complex]] = None) -> EigenPair:
     """
@@ -84,24 +89,35 @@ def eigensolver(
     Tuple[np.ndarray, np.ndarray]
         Eigenvalues and eigenvectors
     """
-    
+
     search_space, selection_rule = check_and_sanitize(
         mat, nvalues, selection_rule, search_space, shift)
 
-    if shift is None:
-        return spectra_sparse_interface.general_eigensolver(
-            mat, nvalues, search_space, selection_rule)
-
-    if isinstance(shift, np.float):
-        return spectra_sparse_interface.general_real_shift_eigensolver(
-            mat, nvalues, search_space, shift, selection_rule)
+    # HACK: 判断是否是稀疏矩阵 调用不同的的接口
+    if (sp.issparse(mat)):
+        if shift is None:            
+            return spectra_sparse_interface.sparse_general_eigensolver(
+                mat, nvalues, search_space, selection_rule)
+        if isinstance(shift, np.float):            
+            return spectra_sparse_interface.sparse_general_real_shift_eigensolver(
+                mat, nvalues, search_space, shift, selection_rule)
+        else:
+            return spectra_sparse_interface.sparse_general_complex_shift_eigensolver(
+                mat, nvalues, search_space, shift.real, shift.imag, selection_rule)
     else:
-        return spectra_sparse_interface.general_complex_shift_eigensolver(
-            mat, nvalues, search_space, shift.real, shift.imag, selection_rule)
+        if shift is None:
+            return spectra_dense_interface.general_eigensolver(
+                mat, nvalues, search_space, selection_rule)
+        if isinstance(shift, np.float):
+            return spectra_dense_interface.general_real_shift_eigensolver(
+                mat, nvalues, search_space, shift, selection_rule)
+        else:
+            return spectra_dense_interface.general_complex_shift_eigensolver(
+                mat, nvalues, search_space, shift.real, shift.imag, selection_rule)
 
-# BUG: 对称矩阵的数据类型 稀疏？
+
 def eigensolverh(
-        mat: scipy.sparse, nvalues: int, selection_rule: Optional[str] = None,
+        mat: Union[np.ndarray, sp.spmatrix], nvalues: int, selection_rule: Optional[str] = None,
         search_space: Optional[int] = None, generalized: np.ndarray = None,
         shift: Optional[Union[np.float, np.complex]] = None) -> EigenPair:
     """Compute ``nvalues`` eigenvalues for the symmetric matrix ``mat``.
@@ -137,13 +153,24 @@ def eigensolverh(
     search_space, selection_rule = check_and_sanitize(
         mat, nvalues, selection_rule, search_space, shift)
 
-    if shift is None:
-        return spectra_sparse_interface.symmetric_eigensolver(
-            mat, nvalues, search_space, selection_rule)
-    elif generalized is None:
-        return spectra_sparse_interface.symmetric_shift_eigensolver(
-            mat, nvalues, search_space, shift, selection_rule)
+    # HACK: 判断是否是稀疏矩阵 调用不同的的接口
+    if (sp.issparse(mat)):
+        if shift is None:
+            return spectra_sparse_interface.sparse_symmetric_eigensolver(
+                mat, nvalues, search_space, selection_rule)
+        elif generalized is None:
+            return spectra_sparse_interface.sparse_symmetric_shift_eigensolver(
+                mat, nvalues, search_space, shift, selection_rule)
+        else:
+            return spectra_sparse_interface.sparse_symmetric_generalized_shift_eigensolver(
+                mat, generalized, nvalues, search_space, shift, selection_rule)
     else:
-        return spectra_sparse_interface.symmetric_generalized_shift_eigensolver(
-            mat, generalized, nvalues, search_space, shift, selection_rule)
-    
+        if shift is None:
+            return spectra_dense_interface.symmetric_eigensolver(
+                mat, nvalues, search_space, selection_rule)
+        elif generalized is None:
+            return spectra_dense_interface.symmetric_shift_eigensolver(
+                mat, nvalues, search_space, shift, selection_rule)
+        else:
+            return spectra_dense_interface.symmetric_generalized_shift_eigensolver(
+                mat, generalized, nvalues, search_space, shift, selection_rule)

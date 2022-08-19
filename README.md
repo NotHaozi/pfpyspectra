@@ -3,13 +3,42 @@
 pfpyspectra based on [pyspectra](https://github.com/NLESC-JCER/pyspectra.git), Python interface to the [C++ Spectra library](https://github.com/yixuan/spectra)
 
 ## Eigensolvers
-**pfPySpecta** offers two general interfaces to [Spectra](https://github.com/yixuan/spectra): **eigensolver** and **eigensolverh**. For sparse
-and symmetric matrices respectively.
+**pfPySpecta** offers two general interfaces to [Spectra](https://github.com/yixuan/spectra): **eigensolver** and **eigensolverh**. For general(dense&sparse) and symmetric(dense&sparse) matrices respectively.These two functions would invoke the most suitable method based on the information provided by the user.
 
-These two functions would invoke the most suitable method based on the information provided by the user.
+## Usage
+```python
+import numpy as np
+import scipy.sparse as sp
+from pfpyspectra import eigensolver, eigensolverh
+
+# matrix size
+size = 100
+
+# number of eigenpairs to compute
+nvalues = 2
+
+# Create random matrix
+xs = np.random.normal(size=size ** 2).reshape(size, size)
+new_xs=sp.rand(size, size, density=0.1, format='csc')
+
+# Create symmetric matrix
+mat = xs + xs.T
+new_mat = new_xs + new_xs.T
+
+# Compute two eigenpairs selecting the eigenvalues with
+# largest magnitude (default).
+eigenvalues, eigenvectors = eigensolver(xs, nvalues)
+sprse_eigenvalues, sprse_eigenvectors = eigensolver(new_xs, nvalues)
+# Compute two eigenpairs selecting the eigenvalues with
+# largest algebraic value
+selection_rule = "LargestAlge"
+symm_eigenvalues, symm_eigenvectors = eigensolverh(
+  mat, nvalues, selection_rule)
+sprse_symm_eigenvalues, sprse_symm_eigenvectors = eigensolverh(
+  mat, nvalues, selection_rule)
+```
 
 **Note**:
-
   The available selection_rules to compute a portion of the spectrum are:
   *  LargestMagn
   *  LargestReal
@@ -21,164 +50,111 @@ These two functions would invoke the most suitable method based on the informati
   *  SmallestAlge
   *  BothEnds
 
-## Eigensolvers Sparse Interface
-You can call directly the sparse interface. You would need
-to import the following module:
+## Eigensolvers Dense Interface
+You can also call directly the dense interface. You would need to import the following module:
 ```python
 import numpy as np
-import scipy.sparse as sp
-
-from pfpyspectra import eigensolver, eigensolverh
+from pfpyspectra import spectra_dense_interface
 ```
-The following functions are available in the spectra_sparse_interface:
+The following functions are available in the spectra_dense_interface:
 *  ```py
    general_eigensolver(
-    mat: scipy.sparse, eigenpairs: int, basis_size: int, selection_rule: str)
+    mat: np.ndarray, eigenpairs: int, basis_size: int, selection_rule: str)
     -> (np.ndarray, np.ndarray)
    ```
 *  ```py
    general_real_shift_eigensolver(
-   mat: scipy.sparse, eigenpairs: int, basis_size: int, shift: float, selection_rule: str)
+   mat: np.ndarray, eigenpairs: int, basis_size: int, shift: float, selection_rule: str)
    -> (np.ndarray, np.ndarray)
    ```
 *  ```py
    general_complex_shift_eigensolver(
-     mat: scipy.sparse, eigenpairs: int, basis_size: int,
+     mat: np.ndarray, eigenpairs: int, basis_size: int,
      shift_real: float, shift_imag: float, selection_rule: str)
      -> (np.ndarray, np.ndarray)
    ```
 *  ```py
    symmetric_eigensolver(
-     mat: scipy.sparse, eigenpairs: int, basis_size: int, selection_rule: str)
+     mat: np.ndarray, eigenpairs: int, basis_size: int, selection_rule: str)
      -> (np.ndarray, np.ndarray)
    ```
 *  ```py
    symmetric_shift_eigensolver(
-     mat: scipy.sparse, eigenpairs: int, basis_size: int, shift: float, selection_rule: str)
+     mat: np.ndarray, eigenpairs: int, basis_size: int, shift: float, selection_rule: str)
      -> (np.ndarray, np.ndarray)
    ```
 *  ```py
    symmetric_generalized_shift_eigensolver(
-     mat_A: scipy.sparse, mat_B: scipy.sparse, eigenpairs: int, basis_size: int, shift: float,
+     mat_A: np.ndarray, mat_B: np.ndarray, eigenpairs: int, basis_size: int, shift: float,
      selection_rule: str)
      -> (np.ndarray, np.ndarray)
    ```
 
+## Eigensolvers Sparse Interface
+You can also call directly the sparse interface. You would need to import the following module:
+```python
+import scipy as sp
+from pfpyspectra import spectra_sparse_interface
+```
+The following functions are available in the spectra_dense_interface:
+*  ```py
+   sparse_general_eigensolver(
+    mat: sp.spmatrix, eigenpairs: int, basis_size: int, selection_rule: str)
+    -> (np.ndarray, np.ndarray)
+   ```
+*  ```py
+   sparse_general_real_shift_eigensolver(
+   mat: sp.spmatrix, eigenpairs: int, basis_size: int, shift: float, selection_rule: str)
+   -> (np.ndarray, np.ndarray)
+   ```
+*  ```py
+   sparse_general_complex_shift_eigensolver(
+     mat: sp.spmatrix, eigenpairs: int, basis_size: int,
+     shift_real: float, shift_imag: float, selection_rule: str)
+     -> (np.ndarray, np.ndarray)
+   ```
+*  ```py
+   sparse_symmetric_eigensolver(
+     mat: sp.spmatrix, eigenpairs: int, basis_size: int, selection_rule: str)
+     -> (np.ndarray, np.ndarray)
+   ```
+*  ```py
+   sparse_symmetric_shift_eigensolver(
+     mat: sp.spmatrix, eigenpairs: int, basis_size: int, shift: float, selection_rule: str)
+     -> (np.ndarray, np.ndarray)
+   ```
+*  ```py
+   sparse_symmetric_generalized_shift_eigensolver(
+     mat_A: sp.spmatrix, mat_B: sp.spmatrix, eigenpairs: int, basis_size: int, shift: float,
+     selection_rule: str)
+     -> (np.ndarray, np.ndarray)
+   ```
 ### Example
-
-```py
+```python
 import numpy as np
-import scipy.sparse as sp
-from scipy.sparse.linalg import eigs, eigsh
+from pfpyspectra import spectra_dense_interface
 
-from pfpyspectra import eigensolver, eigensolverh
-
-# matrix size
 size = 100
-
-# number of eigenpairs to compute
-nvalues = 2
-SIGMA = 1.0 + 0.5j
+nvalues = 2 # eigenpairs to compute
+search_space = nvalues * 2 # size of the search space
+shift = 1.0
 
 # Create random matrix
 xs = np.random.normal(size=size ** 2).reshape(size, size)
-print("xs = ", xs)
-print("--------------------")
 
 # Create symmetric matrix
 mat = xs + xs.T
-print("mat = ", mat)
-print("--------------------")
+
 # Compute two eigenpairs selecting the eigenvalues with
-# largest magnitude (default).
+# largest algebraic value
+selection_rule = "LargestAlge"
+symm_eigenvalues, symm_eigenvectors = \
+  spectra_dense_interface.symmetric_eigensolver(
+  mat, nvalues, search_space, selection_rule)
 
-
-new_xs = sp.csc_matrix(xs)
-print("new_xs = ", xs)
-print("--------------------")
-
-# selection_rule = ["LargestMagn",
-#                   "LargestReal",
-#                   "LargestImag",
-#                   "LargestAlge",
-#                   "SmallestReal",
-#                   "SmallestMagn",
-#                   "SmallestImag",
-#                   "SmallestAlge",
-#                   "BothEnds"]
-
-selection_rule = ["LargestMagn",
-                  "LargestReal",
-                  "LargestImag",
-                  "SmallestReal",
-                  ]
-
-# which_rule = ["LM", "LR", "LI", "SR", "SM", "SI"]
-which_rule = ["LM", "LR", "LI", "SR"]
-
-
-for i in range(4):
-    print(f"\ntest_rule{i}:{which_rule[i]}")
-    # 1 eigensolver
-
-    # 1.1
-    eigenvalues, eigenvectors = eigensolver(new_xs, nvalues, selection_rule[i])
-    
-    print()    
-    print("test_noshift:--------------------------------")
-    print(eigenvalues)
-    # print("--------------------")
-    # print(eigenvectors)
-    # print("--------------------")
-
-    print("scipy_noshift:ans--------------------------------")
-    ans_vals, ans_vecs = eigs(new_xs, nvalues, which=which_rule[i], ncv=6)
-    print(ans_vals)
-    # print("--------------------")
-    # print(ans_vecs)
-    # print("--------------------")
-
-    # 1.2
-
-    eigenvalues, eigenvectors = eigensolver(
-        new_xs, nvalues, selection_rule[i], shift=SIGMA.real)
-
-    print()
-
-    print("test_shift_real--------------------------------")    
-    print(eigenvalues)
-    # print("--------------------")
-    # print(eigenvectors)
-    # print("--------------------")
-
-    print("scipy_shift_real:ans--------------------------------")
-    ans_vals, ans_vecs = eigs(new_xs, nvalues, which=which_rule[i], sigma=SIGMA.real)
-    print(ans_vals)
-    # print("--------------------")
-    # print(ans_vecs)
-    # print("--------------------")
-
-    # 1.3
-
-    eigenvalues, eigenvectors = eigensolver(
-        new_xs, nvalues, selection_rule[i], shift=SIGMA)
-    
-    print()
-    print("test_shift--------------------------------")
-    print(eigenvalues)
-    # print("--------------------")
-    # print(eigenvectors)
-    # print("--------------------")
-
-    print("scipy_shift:ans--------------------------------")
-    ans_vals, ans_vecs = eigs(new_xs, nvalues, which=which_rule[i], sigma=SIGMA)
-    print(ans_vals)
-    # print("--------------------")
-    # print(ans_vecs)
-    # print("--------------------")
 ```
-
-**All functions return a tuple whith the resulting eigenvalues and eigenvectors.**
+> Note: **All functions return a tuple whith the resulting eigenvalues and eigenvectors.**
+> For more examples, please see the directory: `pfpyspectra/tests/`
 
 
 ## Installation
@@ -188,10 +164,20 @@ To install pyspectra, do:
   cd pyspectra
   bash ./install.sh
 ```
-
+## Test
 Run tests (including coverage) with:
 
 ```bash
-  pytest tests
+  pytest tests/test_dense_pyspectra.py
+  pytest tests/test_sparse_pyspectra.py
+  pytest tests/test_pyspectra.py
+  # also you can just `pytest tests`
 ```
+> **Help:** If you don't pass them all, don't worry, try a few more times.  
+> I think that's because of the random parameter problem, It will not affect the use, can you help me?
 
+## License
+No. Just for fun!  
+Thanks :  
+  [pyspectra](https://github.com/NLESC-JCER/pyspectra.git),  
+  [C++ Spectra library](https://github.com/yixuan/spectra)

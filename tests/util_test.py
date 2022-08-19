@@ -1,5 +1,6 @@
 """Helper functions to tests."""
 
+from typing import Union
 import numpy as np
 import scipy.sparse as sp
 
@@ -14,10 +15,9 @@ def create_random_matrix(size: int) -> np.array:
     return np.random.normal(size=size ** 2).reshape(size, size)
 
 
-def create_random_spmatrix(size: int) -> sp:
+def create_random_spmatrix(size: int) -> sp.spmatrix:
     """Create a scipy random spmatrix."""
-    mat = sp.rand(size, size, format='csc')
-    return mat
+    return sp.rand(size, size, format='csc')
 
 
 def create_symmetic_matrix(size: int) -> np.array:
@@ -26,8 +26,14 @@ def create_symmetic_matrix(size: int) -> np.array:
     return xs + xs.T
 
 
+def create_sparse_symmetic_matrix(size: int) -> sp.spmatrix:
+    """Create a sparse symmetric matrix."""
+    xs = create_random_spmatrix(size)
+    return xs + xs.T
+
+
 def check_eigenpairs(
-        matrix: sp, eigenvalues: np.ndarray,
+        matrix: Union[np.ndarray, sp.spmatrix], eigenvalues: np.ndarray,
         eigenvectors: np.ndarray) -> bool:
     """Check that the eigenvalue equation holds."""
     for i, value in enumerate(eigenvalues):
