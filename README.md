@@ -96,7 +96,7 @@ You can also call directly the sparse interface. You would need to import the fo
 import scipy as sp
 from pfpyspectra import spectra_sparse_interface
 ```
-The following functions are available in the spectra_dense_interface:
+The following functions are available in the spectra_sparse_interface:
 *  ```py
    sparse_general_eigensolver(
     mat: sp.spmatrix, eigenpairs: int, basis_size: int, selection_rule: str)
@@ -129,7 +129,7 @@ The following functions are available in the spectra_dense_interface:
      selection_rule: str)
      -> (np.ndarray, np.ndarray)
    ```
-### Example
+## Example
 ```python
 import numpy as np
 from pfpyspectra import spectra_dense_interface
