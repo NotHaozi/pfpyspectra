@@ -90,3 +90,4 @@ scripts/.DS_Store
 tmp
 
 .pytest_cache
+software/

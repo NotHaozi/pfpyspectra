@@ -1,14 +1,13 @@
 # pfPySpectra
 
-pfpyspectra based on [pyspectra](https://github.com/NLESC-JCER/pyspectra.git), Python interface to the [C++ Spectra library](https://github.com/yixuan/spectra)
+pfPySpectra offers the Python interface to the [C++ Spectra library](https://github.com/yixuan/spectra) by pybind11, faster than [sicpy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.eigs.html#scipy.sparse.linalg.eigs) in some ways.
 
-## Eigensolvers
-**pfPySpecta** offers two general interfaces to [Spectra](https://github.com/yixuan/spectra): **eigensolver** and **eigensolverh**. For general(dense&sparse) and symmetric(dense&sparse) matrices respectively.These two functions would invoke the most suitable method based on the information provided by the user.
-
+# Eigensolvers
+**pfPySpecta** offers two general interfaces to [Spectra](https://github.com/yixuan/spectra): **eigensolver** and **eigensolverh**. For general(dense&sparse) and symmetric(dense&sparse) matrices respectively.These two functions would invoke the most suitable method based on the information provided by the user
 ## Usage
 ```python
 import numpy as np
-import scipy.sparse as sp
+import scipy.sparse as s
 from pfpyspectra import eigensolver, eigensolverh
 
 # matrix size
